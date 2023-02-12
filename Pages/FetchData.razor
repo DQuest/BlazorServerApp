@@ -1,0 +1,137 @@
+﻿@page "/fetchdata"
+@using BlazorServerApp.Models
+@using BlazorServerApp.Services
+@using BlazorServerApp.Enums
+@using BlazorServerApp.Extensions
+@inject WeatherForecastService ForecastService
+
+<PageTitle>Weather forecast</PageTitle>
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from a service.</p>
+
+@if (forecasts == null)
+{
+    <MudSelect Label="Таблица" AnchorOrigin="Origin.BottomCenter" ValueChanged="@((TableType type) => GetTable(type))">
+        <MudSelectItem Value="@TableType.Animal"> @TableType.Animal.GetDescription() </MudSelectItem>
+        <MudSelectItem Value="@TableType.City"> @TableType.City.GetDescription() </MudSelectItem>
+        <MudSelectItem Value="@TableType.User"> @TableType.User.GetDescription() </MudSelectItem>
+    </MudSelect>
+}
+else
+{
+    @* <table class="table"> *@
+    @*     <thead> *@
+    @*     <tr> *@
+    @*         <th>Date</th> *@
+    @*         <th>Temp. (C)</th> *@
+    @*         <th>Temp. (F)</th> *@
+    @*         <th>Summary</th> *@
+    @*     </tr> *@
+    @*     </thead> *@
+    @*     <tbody> *@
+    @*     @foreach (var forecast in forecasts) *@
+    @*     { *@
+    @*         <tr> *@
+    @*             <td>@forecast.Date.ToShortDateString()</td> *@
+    @*             <td>@forecast.TemperatureC</td> *@
+    @*             <td>@forecast.TemperatureF</td> *@
+    @*             <td>@forecast.Summary</td> *@
+    @*         </tr> *@
+    @*     } *@
+    @*     </tbody> *@
+    @* </table> *@
+
+    <MudSelect Label="Таблица" AnchorOrigin="Origin.BottomCenter" ValueChanged="@((TableType type) => GetTable(type))">
+        <MudSelectItem Value="@TableType.Animal"> @TableType.Animal.GetDescription() </MudSelectItem>
+        <MudSelectItem Value="@TableType.City"> @TableType.City.GetDescription() </MudSelectItem>
+        <MudSelectItem Value="@TableType.User"> @TableType.User.GetDescription() </MudSelectItem>
+    </MudSelect>
+    
+    <br/>
+    <br/>
+
+    @if (_tableType == TableType.Animal)
+    {
+        <MudSimpleTable Dense Bordered Striped Style="overflow-x: auto;">
+            <thead>
+            <tr>
+                <th>Дата</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var row in forecasts)
+            {
+                <tr>
+                    <td>@row.Date</td>
+                </tr>
+            }
+            </tbody>
+        </MudSimpleTable>
+    }
+    else if (_tableType == TableType.City)
+    {
+        <MudSimpleTable Dense Bordered Striped Style="overflow-x: auto;">
+            <thead>
+            <tr>
+                <th>Температура C</th>
+                <th>Температура F</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var row in forecasts)
+            {
+                <tr>
+                    <td>@row.TemperatureC</td>
+                    <td>@row.TemperatureF</td>
+                </tr>
+            }
+            </tbody>
+        </MudSimpleTable>
+    }
+    else if (_tableType == TableType.User)
+    {
+        <MudSimpleTable Dense Bordered Striped Style="overflow-x: auto;">
+            <thead>
+            <tr>
+                <th>Сводка</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var row in forecasts)
+            {
+                <tr>
+                    <td>@row.Summary</td>
+                </tr>
+            }
+            </tbody>
+        </MudSimpleTable>
+    }
+    
+}
+
+@code {
+    private WeatherForecast[]? forecasts;
+    private TableType _tableType;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //forecasts = await ForecastService.GetForecastAsync(DateOnly.FromDateTime(DateTime.Now));
+    }
+
+    private async Task GetTable(TableType tableType)
+    {
+        _tableType = tableType;
+        switch (_tableType)
+        {
+            case TableType.Animal:
+            {
+                forecasts = await ForecastService.GetForecastAsync(DateOnly.FromDateTime(DateTime.Now));
+
+                break;
+                
+            }
+        }
+    }
+}
