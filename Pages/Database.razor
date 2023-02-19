@@ -1,0 +1,134 @@
+﻿@page "/database"
+@using BlazorServerApp.Models
+@using BlazorServerApp.Services
+@using BlazorServerApp.Enums
+@using BlazorServerApp.Extensions
+@inject AnimalService AnimalService
+@inject UserService UserService
+@inject CityService CityService
+
+
+<PageTitle>DataBase</PageTitle>
+
+<h1>DataBase</h1>
+
+
+<MudSelect Label="Таблица" AnchorOrigin="Origin.BottomCenter" ValueChanged="@((TableType type) => GetTable(type))">
+    <MudSelectItem Value="@TableType.Animal"> @TableType.Animal.GetDescription() </MudSelectItem>
+    <MudSelectItem Value="@TableType.City"> @TableType.City.GetDescription() </MudSelectItem>
+    <MudSelectItem Value="@TableType.User"> @TableType.User.GetDescription() </MudSelectItem>
+</MudSelect>
+
+<br/>
+<br/>
+
+@switch (_tableType)
+{
+    case TableType.Animal:
+        <MudSimpleTable Dense Bordered Striped Style="overflow-x: auto;">
+            <thead>
+            <tr>
+                <th>Идентификатор</th>
+                <th>Наименование</th>
+                <th>Возраст</th>
+                <th>Порода</th>
+            </tr>
+            </thead>
+            <tbody>
+            @if (_animals != null)
+            {
+                foreach (var a in _animals)
+                {
+                    <tr>
+                        <td>@a.Id</td>
+                        <td>@a.Name</td>
+                        <td>@a.Age</td>
+                        <td>@a.Breed</td>
+
+                    </tr>
+                }
+            }
+            </tbody>
+        </MudSimpleTable>
+        break;
+    case TableType.City:
+        <MudSimpleTable Dense Bordered Striped Style="overflow-x: auto;">
+            <thead>
+            <tr>
+                <th>Идентификатор</th>
+                <th>Наименование</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var c in _cities)
+            {
+                <tr>
+                    <td>@c.Id</td>
+                    <td>@c.NameCity</td>
+                </tr>
+            }
+            </tbody>
+        </MudSimpleTable>
+        break;
+    case TableType.User:
+        <MudSimpleTable Dense Bordered Striped Style="overflow-x: auto;">
+            <thead>
+            <tr>
+                <th>Идентификатор</th>
+                <th>Наименование</th>
+                <th>Возраст</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var u in _users)
+            {
+                <tr>
+                    <td>@u.Id</td>
+                    <td>@u.Name</td>
+                    <td>@u.Age</td>
+                </tr>
+            }
+            </tbody>
+        </MudSimpleTable>
+        break;
+}
+
+
+@code {
+    private TableType _tableType;
+
+    private User[]? _users;
+
+    private Animal[]? _animals;
+
+    private City[]? _cities;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _animals = await AnimalService.GetAnimalsAsync();
+    }
+
+    private async Task GetTable(TableType tableType)
+    {
+        _tableType = tableType;
+        switch (_tableType)
+        {
+            case TableType.Animal:
+            {
+                _animals = await AnimalService.GetAnimalsAsync();
+                break;
+            }
+            case TableType.City:
+            {
+                _cities = await CityService.GetCitiesAsync();
+                break;
+            }
+            case TableType.User:
+            {
+                _users = await UserService.GetUsersAsync();
+                break;
+            }
+        }
+    }
+
+}

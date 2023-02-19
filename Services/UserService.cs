@@ -4,11 +4,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlazorServerApp.Services;
 
-public class UserService
+public class UserService : DatabaseService
 {
-    public async Task<User[]> GetUsersAsync(ApplicationContext dataBase)
+    public UserService(ApplicationContext dbContext) : base(dbContext)
     {
-        return await dataBase.Users.ToArrayAsync();
     }
-    
+
+    public async Task<User[]> GetUsersAsync()
+    {
+        return await DbContext.Users.ToArrayAsync();
+    }
 }

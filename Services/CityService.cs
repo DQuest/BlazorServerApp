@@ -4,11 +4,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BlazorServerApp.Services;
 
-public class CityService
+public class CityService : DatabaseService
 {
-    public async Task<City[]> GetCitiesAsync(ApplicationContext dataBase)
+    public CityService(ApplicationContext dbContext) : base(dbContext)
     {
-        return await dataBase.Cities.ToArrayAsync();
     }
-    
+
+    public async Task<City[]> GetCitiesAsync()
+    {
+        return await DbContext.Cities.ToArrayAsync();
+    }
 }

@@ -1,15 +1,17 @@
 ﻿using BlazorServerApp.Models;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace BlazorServerApp.Services;
 
-public class AnimalService
+public class AnimalService : DatabaseService
 {
-    
-    public async Task<Animal[]> GetAnimalsAsync(ApplicationContext dataBase)
+    public AnimalService(ApplicationContext dbContext) : base(dbContext)
     {
-        return await dataBase.Animals.ToArrayAsync();
     }
+
     
+    public async Task<Animal[]> GetAnimalsAsync()
+    {
+        return await DbContext.Animals.ToArrayAsync();
+    }
 }
