@@ -1,13 +1,20 @@
-﻿@page "/fetchdata"
+﻿@page "/database"
 @using BlazorServerApp.Models
 @using BlazorServerApp.Services
 @using BlazorServerApp.Enums
 @using BlazorServerApp.Extensions
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.EntityFrameworkCore.Update
+@using System.Data
 @inject WeatherForecastService ForecastService
+@inject AnimalService AnimalService
+@inject UserService UserService
+@inject CityService CityService
 
-<PageTitle>Weather forecast</PageTitle>
 
-<h1>Weather forecast</h1>
+<PageTitle>DataBase</PageTitle>
+
+<h1>DataBase</h1>
 
 <p>This component demonstrates fetching data from a service.</p>
 
@@ -21,28 +28,7 @@
 }
 else
 {
-    @* <table class="table"> *@
-    @*     <thead> *@
-    @*     <tr> *@
-    @*         <th>Date</th> *@
-    @*         <th>Temp. (C)</th> *@
-    @*         <th>Temp. (F)</th> *@
-    @*         <th>Summary</th> *@
-    @*     </tr> *@
-    @*     </thead> *@
-    @*     <tbody> *@
-    @*     @foreach (var forecast in forecasts) *@
-    @*     { *@
-    @*         <tr> *@
-    @*             <td>@forecast.Date.ToShortDateString()</td> *@
-    @*             <td>@forecast.TemperatureC</td> *@
-    @*             <td>@forecast.TemperatureF</td> *@
-    @*             <td>@forecast.Summary</td> *@
-    @*         </tr> *@
-    @*     } *@
-    @*     </tbody> *@
-    @* </table> *@
-
+    
     <MudSelect Label="Таблица" AnchorOrigin="Origin.BottomCenter" ValueChanged="@((TableType type) => GetTable(type))">
         <MudSelectItem Value="@TableType.Animal"> @TableType.Animal.GetDescription() </MudSelectItem>
         <MudSelectItem Value="@TableType.City"> @TableType.City.GetDescription() </MudSelectItem>
@@ -57,15 +43,25 @@ else
         <MudSimpleTable Dense Bordered Striped Style="overflow-x: auto;">
             <thead>
             <tr>
-                <th>Дата</th>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Breed</th>
             </tr>
             </thead>
             <tbody>
-            @foreach (var row in forecasts)
+            @if (_animals != null)
             {
-                <tr>
-                    <td>@row.Date</td>
-                </tr>
+                foreach (var a in _animals)
+                {
+                    <tr>
+                        <td>@a.Id</td>
+                        <td>@a.Name</td>
+                        <td>@a.Age</td>
+                        <td>@a.Breed</td>
+
+                    </tr>
+                }
             }
             </tbody>
         </MudSimpleTable>
@@ -75,16 +71,16 @@ else
         <MudSimpleTable Dense Bordered Striped Style="overflow-x: auto;">
             <thead>
             <tr>
-                <th>Температура C</th>
-                <th>Температура F</th>
+                <th>Id</th>
+                <th>NameCity</th>
             </tr>
             </thead>
             <tbody>
-            @foreach (var row in forecasts)
+            @foreach (var c in _cities)
             {
                 <tr>
-                    <td>@row.TemperatureC</td>
-                    <td>@row.TemperatureF</td>
+                    <td>@c.Id</td>
+                    <td>@c.NameCity</td>
                 </tr>
             }
             </tbody>
@@ -95,14 +91,18 @@ else
         <MudSimpleTable Dense Bordered Striped Style="overflow-x: auto;">
             <thead>
             <tr>
-                <th>Сводка</th>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Age</th>
             </tr>
             </thead>
             <tbody>
-            @foreach (var row in forecasts)
+            @foreach (var u in _users)
             {
                 <tr>
-                    <td>@row.Summary</td>
+                    <td>@u.Id</td>
+                    <td>@u.Name</td>
+                    <td>@u.Age</td>
                 </tr>
             }
             </tbody>
@@ -112,25 +112,42 @@ else
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
+    private WeatherForecast[]? forecasts = Array.Empty<WeatherForecast>();
     private TableType _tableType;
+    
+    private User[]? _users;
 
-    protected override async Task OnInitializedAsync()
-    {
-        //forecasts = await ForecastService.GetForecastAsync(DateOnly.FromDateTime(DateTime.Now));
-    }
+    private Animal[]? _animals;
 
+    private City[]? _cities;
+    
+    private List<Animal> _displayData;
+    
+    
     private async Task GetTable(TableType tableType)
     {
+        
         _tableType = tableType;
-        switch (_tableType)
+        using (ApplicationContext db = new ApplicationContext())
         {
-            case TableType.Animal:
+            switch (_tableType)
             {
-                forecasts = await ForecastService.GetForecastAsync(DateOnly.FromDateTime(DateTime.Now));
-
-                break;
-                
+            
+                case TableType.Animal:
+                {
+                    _animals = await AnimalService.GetAnimalsAsync(db);
+                    break;
+                }
+                case TableType.City:
+                {
+                    _cities = await CityService.GetCitiesAsync(db);
+                    break;
+                }
+                case TableType.User:
+                {
+                    _users = await UserService.GetUsersAsync(db);
+                    break;
+                }    
             }
         }
     }

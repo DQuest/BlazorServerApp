@@ -1,6 +1,9 @@
+using BlazorServerApp;
+using BlazorServerApp.Models;
 using BlazorServerApp.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using MudBlazor;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,10 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddSingleton<ApplicationContext>();
+builder.Services.AddScoped<WeatherForecastService>();
+builder.Services.AddScoped<AnimalService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<CityService>();
 builder.Services.AddMudServices();
 
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -31,3 +40,7 @@ app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
 app.Run();
+
+using var db = new ApplicationContext();
+
+db.SaveChanges();
