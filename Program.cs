@@ -1,10 +1,7 @@
 using BlazorServerApp;
-using BlazorServerApp.Models;
 using BlazorServerApp.Services;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-using MudBlazor;
 using MudBlazor.Services;
+using RazorComponentsPreview;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +14,7 @@ builder.Services.AddScoped<AnimalService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<CityService>();
 builder.Services.AddMudServices();
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
@@ -30,6 +28,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseRazorComponentsRuntimeCompilation();
+
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
@@ -40,7 +40,3 @@ app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
 app.Run();
-
-using var db = new ApplicationContext();
-
-db.SaveChanges();

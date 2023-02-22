@@ -10,8 +10,10 @@ public class AnimalService : DatabaseService
     }
 
     
-    public async Task<Animal[]> GetAnimalsAsync()
+    public async Task<List<Animal>> GetAnimalsAsync()
     {
-        return await DbContext.Animals.ToArrayAsync();
+        return await DbContext.Animals.ToListAsync();
     }
+    
+    
 }

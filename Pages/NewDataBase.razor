@@ -1,0 +1,206 @@
+﻿@page "/NewDataBase"
+
+@using BlazorServerApp.Models
+@using BlazorServerApp.Services
+@using BlazorServerApp.Enums
+@inject AnimalService AnimalService
+@inject UserService UserService
+@inject HttpClient HttpClient
+@inject ISnackbar Snackbar
+@inject CityService CityService
+
+<MudTable Items="@Animals" Dense="@dense" Hover="@hover" ReadOnly="@ronly" CanCancelEdit="@canCancelEdit" Filter="new Func<Animal,bool>(FilterFunc)"
+          @bind-SelectedItem="selectedItem1" SortLabel="Sort By" CommitEditTooltip="Commit Edit"
+          OnCommitEditClick="@(() => Snackbar.Add("Commit Edit Handler Invoked"))" RowEditPreview="BackupItem" RowEditCancel="ResetItemToOriginalValues"
+          RowEditCommit="ItemHasBeenCommitted" IsEditRowSwitchingBlocked="@blockSwitch" ApplyButtonPosition="@applyButtonPosition" EditButtonPosition="@editButtonPosition" EditTrigger="@editTrigger">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Periodic Elements</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <ColGroup>
+        @if (applyButtonPosition.DisplayApplyButtonAtStart() || (editButtonPosition.DisplayEditButtonAtStart() && editTrigger == TableEditTrigger.EditButton))
+        {
+            <col style="width:50px;" />
+        }
+        <col style="width:50px;" />
+        <col style="width:80px;" />
+        <col style="width:50%;" />
+        <col />
+        <col />
+        @if (applyButtonPosition.DisplayApplyButtonAtEnd() || (editButtonPosition.DisplayEditButtonAtEnd() && editTrigger == TableEditTrigger.EditButton))
+        {
+            <col style="width:50px;" />
+        }
+    </ColGroup>
+    <HeaderContent>
+        <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x=>x.Id)">Идентификатор</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Animal, object>(x=>x.Name)">Наименование</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x=>x.Age)">Возраст</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x=>x.Breed)">Порода</MudTableSortLabel></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Id">@context.Id</MudTd>
+        <MudTd DataLabel="Name">@context.Name</MudTd>
+        <MudTd DataLabel="Age">@context.Age</MudTd>
+        <MudTd DataLabel="Breed">@context.Breed</MudTd>
+    </RowTemplate>
+    <RowEditingTemplate>
+
+        <MudTd DataLabel="Breed">
+            <MudNumericField @bind-Value="@context.Id" Required Min="1" />
+        </MudTd>
+        
+        <MudTd DataLabel="Name">
+            <MudTextField @bind-Value="@context.Name" Required />
+        </MudTd>
+        
+        <MudTd DataLabel="Age">
+            <MudNumericField @bind-Value="@context.Age" Required Min="1" />
+        </MudTd>
+        
+        <MudTd DataLabel="Breed">
+            <MudTextField @bind-Value="@context.Breed" Required />
+        </MudTd>
+        
+        
+    </RowEditingTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+    <EditButtonContent Context="button">
+        <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Class="pa-0" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled" />
+    </EditButtonContent>
+</MudTable>
+
+<MudSwitch @bind-Checked="@hover" Color="Color.Primary">Hover</MudSwitch>
+<MudSwitch @bind-Checked="@dense" Color="Color.Secondary">Dense</MudSwitch>
+<MudSwitch @bind-Checked="@ronly" Color="Color.Tertiary">Read Only</MudSwitch>
+<MudSwitch @bind-Checked="@canCancelEdit" Color="Color.Info">Can Cancel Edit</MudSwitch>
+<MudSwitch @bind-Checked="@blockSwitch" Color="Color.Success">Block Edit Row Switching</MudSwitch>
+<MudGrid>
+    <MudItem xs="12" md="4">
+        <MudSelect Label="Edit Trigger" T="TableEditTrigger" @bind-Value="editTrigger">
+            <MudSelectItem Value="TableEditTrigger.RowClick">Row Click</MudSelectItem>
+            <MudSelectItem Value="TableEditTrigger.EditButton">Edit Button</MudSelectItem>
+        </MudSelect>
+    </MudItem>
+    @if (editTrigger == TableEditTrigger.EditButton)
+    {
+        <MudItem xs="12" md="4">
+            <MudSelect Label="Edit Button Postion" T="TableEditButtonPosition" @bind-Value="editButtonPosition">
+                <MudSelectItem Value="TableEditButtonPosition.Start">Start</MudSelectItem>
+                <MudSelectItem Value="TableEditButtonPosition.End">End</MudSelectItem>
+                <MudSelectItem Value="TableEditButtonPosition.StartAndEnd">Start and End</MudSelectItem>
+            </MudSelect>
+        </MudItem>
+    }
+    <MudItem xs="12" md="4">
+        <MudSelect Label="Apply Button Postion" T="TableApplyButtonPosition" @bind-Value="applyButtonPosition">
+            <MudSelectItem Value="TableApplyButtonPosition.Start">Start</MudSelectItem>
+            <MudSelectItem Value="TableApplyButtonPosition.End">End</MudSelectItem>
+            <MudSelectItem Value="TableApplyButtonPosition.StartAndEnd">Start and End</MudSelectItem>
+        </MudSelect>
+    </MudItem>
+</MudGrid>
+
+<MudText Inline="true">Selected1: @selectedItem1?.Name</MudText>
+
+<MudExpansionPanels Style="flex: 1;">
+    <MudExpansionPanel Text="Show inline-edit event log">
+        @foreach (var message in editEvents)
+        {
+            <MudText>@message</MudText>
+        }
+        @if (editEvents.Count > 0)
+        {
+            <div class="d-flex">
+                <MudSpacer />
+                <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="ClearEventLog">Clear event log</MudButton>
+            </div>
+        }
+    </MudExpansionPanel>
+</MudExpansionPanels>
+
+@code {
+    private List<string> editEvents = new();
+    private bool dense = false;
+    private bool hover = true;
+    private bool ronly = false;
+    private bool canCancelEdit = false;
+    private bool blockSwitch = false;
+    private string searchString = "";
+    private Animal selectedItem1 = null;
+    private Animal elementBeforeEdit;
+    private HashSet<Animal> selectedItems1 = new HashSet<Animal>();
+    private TableApplyButtonPosition applyButtonPosition = TableApplyButtonPosition.End;
+    private TableEditButtonPosition editButtonPosition = TableEditButtonPosition.End;
+    private TableEditTrigger editTrigger = TableEditTrigger.RowClick;
+    //private IEnumerable<Element> Elements = new List<Element>();
+    
+    private List<Animal> Animals = new List<Animal>();
+
+
+    private TableType _tableType;
+
+    private User[]? _users;
+
+    private List<Animal> _animals;
+
+    private City[]? _cities;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Animals = await AnimalService.GetAnimalsAsync();
+    }
+
+    private void ClearEventLog()
+    {
+        editEvents.Clear();
+    }
+
+    private void AddEditionEvent(string message)
+    {
+        editEvents.Add(message);
+        StateHasChanged();
+    }
+
+    private void BackupItem(object element)
+    {
+        elementBeforeEdit = new()
+            {
+                Id = ((Animal)element).Id,
+                Name = ((Animal)element).Name,
+                Age = ((Animal)element).Age,
+                Breed = ((Animal)element).Breed
+            };
+        AddEditionEvent($"RowEditPreview event: made a backup of Element {((Animal)element).Name}");
+    }
+
+    private void ItemHasBeenCommitted(object element)
+    {
+        AddEditionEvent($"RowEditCommit event: Changes to Element {((Animal)element).Name} committed");
+    }
+
+    private void ResetItemToOriginalValues(object element)
+    {
+        ((Animal)element).Id = elementBeforeEdit.Id;
+        ((Animal)element).Name = elementBeforeEdit.Name;
+        ((Animal)element).Age = elementBeforeEdit.Age;
+        ((Animal)element).Breed = elementBeforeEdit.Breed;
+        AddEditionEvent($"RowEditCancel event: Editing of Element {((Animal)element).Name} canceled");
+    }
+
+    private bool FilterFunc(Animal element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Breed.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{element.Age} {element.Id}".Contains(searchString))
+            return true;
+        return false;
+    }
+}
