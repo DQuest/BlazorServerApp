@@ -10,8 +10,8 @@ public class CityService : DatabaseService
     {
     }
 
-    public async Task<City[]> GetCitiesAsync()
+    public async Task<List<City>> GetCitiesAsync()
     {
-        return await DbContext.Cities.ToArrayAsync();
+        return await DbContext.Cities.ToListAsync();
     }
 }

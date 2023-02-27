@@ -3,16 +3,19 @@
 @using BlazorServerApp.Models
 @using BlazorServerApp.Services
 @using BlazorServerApp.Enums
+@using BlazorServerApp.Extensions
 @inject AnimalService AnimalService
 @inject UserService UserService
-@inject HttpClient HttpClient
-@inject ISnackbar Snackbar
 @inject CityService CityService
 
+<MudSelect Label="Таблица" AnchorOrigin="Origin.BottomCenter" ValueChanged="@((TableType type) => GetTable(type))">
+    <MudSelectItem Value="@TableType.Animal"> @TableType.Animal.GetDescription() </MudSelectItem>
+    <MudSelectItem Value="@TableType.City"> @TableType.City.GetDescription() </MudSelectItem>
+    <MudSelectItem Value="@TableType.User"> @TableType.User.GetDescription() </MudSelectItem>
+</MudSelect>
+
 <MudTable Items="@Animals" Dense="@dense" Hover="@hover" ReadOnly="@ronly" CanCancelEdit="@canCancelEdit" Filter="new Func<Animal,bool>(FilterFunc)"
-          @bind-SelectedItem="selectedItem1" SortLabel="Sort By" CommitEditTooltip="Commit Edit"
-          OnCommitEditClick="@(() => Snackbar.Add("Commit Edit Handler Invoked"))" RowEditPreview="BackupItem" RowEditCancel="ResetItemToOriginalValues"
-          RowEditCommit="ItemHasBeenCommitted" IsEditRowSwitchingBlocked="@blockSwitch" ApplyButtonPosition="@applyButtonPosition" EditButtonPosition="@editButtonPosition" EditTrigger="@editTrigger">
+          @bind-SelectedItem="selectedItem1" SortLabel="Sort By" CommitEditTooltip="Commit Edit">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Periodic Elements</MudText>
         <MudSpacer />
@@ -73,58 +76,10 @@
     </EditButtonContent>
 </MudTable>
 
-<MudSwitch @bind-Checked="@hover" Color="Color.Primary">Hover</MudSwitch>
-<MudSwitch @bind-Checked="@dense" Color="Color.Secondary">Dense</MudSwitch>
-<MudSwitch @bind-Checked="@ronly" Color="Color.Tertiary">Read Only</MudSwitch>
-<MudSwitch @bind-Checked="@canCancelEdit" Color="Color.Info">Can Cancel Edit</MudSwitch>
-<MudSwitch @bind-Checked="@blockSwitch" Color="Color.Success">Block Edit Row Switching</MudSwitch>
-<MudGrid>
-    <MudItem xs="12" md="4">
-        <MudSelect Label="Edit Trigger" T="TableEditTrigger" @bind-Value="editTrigger">
-            <MudSelectItem Value="TableEditTrigger.RowClick">Row Click</MudSelectItem>
-            <MudSelectItem Value="TableEditTrigger.EditButton">Edit Button</MudSelectItem>
-        </MudSelect>
-    </MudItem>
-    @if (editTrigger == TableEditTrigger.EditButton)
-    {
-        <MudItem xs="12" md="4">
-            <MudSelect Label="Edit Button Postion" T="TableEditButtonPosition" @bind-Value="editButtonPosition">
-                <MudSelectItem Value="TableEditButtonPosition.Start">Start</MudSelectItem>
-                <MudSelectItem Value="TableEditButtonPosition.End">End</MudSelectItem>
-                <MudSelectItem Value="TableEditButtonPosition.StartAndEnd">Start and End</MudSelectItem>
-            </MudSelect>
-        </MudItem>
-    }
-    <MudItem xs="12" md="4">
-        <MudSelect Label="Apply Button Postion" T="TableApplyButtonPosition" @bind-Value="applyButtonPosition">
-            <MudSelectItem Value="TableApplyButtonPosition.Start">Start</MudSelectItem>
-            <MudSelectItem Value="TableApplyButtonPosition.End">End</MudSelectItem>
-            <MudSelectItem Value="TableApplyButtonPosition.StartAndEnd">Start and End</MudSelectItem>
-        </MudSelect>
-    </MudItem>
-</MudGrid>
-
-<MudText Inline="true">Selected1: @selectedItem1?.Name</MudText>
-
-<MudExpansionPanels Style="flex: 1;">
-    <MudExpansionPanel Text="Show inline-edit event log">
-        @foreach (var message in editEvents)
-        {
-            <MudText>@message</MudText>
-        }
-        @if (editEvents.Count > 0)
-        {
-            <div class="d-flex">
-                <MudSpacer />
-                <MudButton Class="mt-3" ButtonType="ButtonType.Button" Variant="Variant.Filled" OnClick="ClearEventLog">Clear event log</MudButton>
-            </div>
-        }
-    </MudExpansionPanel>
-</MudExpansionPanels>
 
 @code {
     private List<string> editEvents = new();
-    private bool dense = false;
+    private bool dense = true;
     private bool hover = true;
     private bool ronly = false;
     private bool canCancelEdit = false;
@@ -132,22 +87,45 @@
     private string searchString = "";
     private Animal selectedItem1 = null;
     private Animal elementBeforeEdit;
-    private HashSet<Animal> selectedItems1 = new HashSet<Animal>();
     private TableApplyButtonPosition applyButtonPosition = TableApplyButtonPosition.End;
     private TableEditButtonPosition editButtonPosition = TableEditButtonPosition.End;
     private TableEditTrigger editTrigger = TableEditTrigger.RowClick;
-    //private IEnumerable<Element> Elements = new List<Element>();
-    
+
     private List<Animal> Animals = new List<Animal>();
+    private List<City> Cities = new List<City>();
+    private List<User> Users = new List<User>();
 
 
     private TableType _tableType;
 
-    private User[]? _users;
+    private List<User> _users;
 
     private List<Animal> _animals;
 
-    private City[]? _cities;
+    private List<City> _cities;
+    
+    private async Task GetTable(TableType tableType)
+    {
+        _tableType = tableType;
+        switch (_tableType)
+        {
+            case TableType.Animal:
+            {
+                Animals = await AnimalService.GetAnimalsAsync();
+                break;
+            }
+            case TableType.City:
+            {
+                Cities = await CityService.GetCitiesAsync();
+                break;
+            }
+            case TableType.User:
+            {
+                Users = await UserService.GetUsersAsync();
+                break;
+            }
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -203,4 +181,6 @@
             return true;
         return false;
     }
+    
+    
 }

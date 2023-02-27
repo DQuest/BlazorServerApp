@@ -10,8 +10,8 @@ public class UserService : DatabaseService
     {
     }
 
-    public async Task<User[]> GetUsersAsync()
+    public async Task<List<User>> GetUsersAsync()
     {
-        return await DbContext.Users.ToArrayAsync();
+        return await DbContext.Users.ToListAsync();
     }
 }
