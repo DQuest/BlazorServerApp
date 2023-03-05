@@ -1,9 +1,8 @@
 ﻿@page "/NewDataBase"
-
+@using BlazorServerApp.Extensions
 @using BlazorServerApp.Models
 @using BlazorServerApp.Services
 @using BlazorServerApp.Enums
-@using BlazorServerApp.Extensions
 @inject AnimalService AnimalService
 @inject UserService UserService
 @inject CityService CityService
@@ -14,14 +13,13 @@
     <MudSelectItem Value="@TableType.User"> @TableType.User.GetDescription() </MudSelectItem>
 </MudSelect>
 
-
-        
+@* <div>@testElem.ToString()</div> *@
 
 @switch (_tableType)
 {
     case TableType.Animal:
     {
-        <MudTable Items="@Animals" Dense="@dense" Hover="@hover" ReadOnly="@ronly" CanCancelEdit="@canCancelEdit" Filter="new Func<Animal, bool>(FilterFuncAnimal)"
+        <MudTable Items="@Animals" Dense Hover CanCancelEdit Filter="new Func<Animal, bool>(FilterFuncAnimal)"
                   @bind-SelectedItem="selectedItemAnimal" SortLabel="Sort By" RowEditPreview="BackupItem" RowEditCommit="ItemHasBeenCommitted" CommitEditTooltip="Commit Edit"> 
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Животные</MudText>
@@ -86,7 +84,7 @@
     }
     case TableType.User:
     {
-        <MudTable Items="@Users" Dense="@dense" Filter="new Func<User, bool>(FilterFuncUser)"
+        <MudTable Items="@Users" Dense Filter="new Func<User, bool>(FilterFuncUser)"
                   @bind-SelectedItem="selectedItemUser" SortLabel="Sort By" CommitEditTooltip="Commit Edit"> 
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Пользователи</MudText>
@@ -144,7 +142,7 @@
     }    
     case TableType.City:
     {
-        <MudTable Items="@Cities" Dense="@dense" Filter="new Func<City, bool>(FilterFuncCity)"
+        <MudTable Items="@Cities" Dense Filter="new Func<City, bool>(FilterFuncCity)"
                   @bind-SelectedItem="selectedItemCity" SortLabel="Sort By" CommitEditTooltip="Commit Edit"> 
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Города</MudText>
@@ -197,25 +195,19 @@
     }
 }
 
-
 @code {
+    public object testElem = null;
+    
     private List<string> editEvents = new();
-
-    private bool dense = true;
-    private bool hover = true;
-    private bool ronly = false;
-    private bool canCancelEdit = false;
-    private bool blockSwitch = false;
-
     private string searchString = "";
 
-    private Animal selectedItemAnimal = null;
+    private Animal selectedItemAnimal;
     private Animal elementBeforeEdit;
 
-    private City selectedItemCity = null;
+    private City selectedItemCity;
     private City elementBeforeEditCity;
 
-    private User selectedItemUser = null;
+    private User selectedItemUser;
     private User elementBeforeEditUser;
 
     private TableApplyButtonPosition applyButtonPosition = TableApplyButtonPosition.End;
@@ -281,10 +273,10 @@
 
     private void ItemHasBeenCommitted(object element)
     {
-        AddEditionEvent($"RowEditCommit event: Changes to Element {((Animal)element).Name} committed");
-        AddEditionEvent($"RowEditCommit event: Changes to Element {((Animal)element).Age} committed");
-        AddEditionEvent($"RowEditCommit event: Changes to Element {((Animal)element).Breed} committed");
-
+        if (element is Animal animal)
+        {
+            AnimalService.UpdateAnimalAsync(animal);
+        }
     }
 
     private void ResetItemToOriginalValues(object element)

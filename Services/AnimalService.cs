@@ -15,5 +15,11 @@ public class AnimalService : DatabaseService
         return await DbContext.Animals.ToListAsync();
     }
     
+    public void UpdateAnimalAsync(Animal animal)
+    {
+        DbContext.Animals.Update(animal);
+        DbContext.SaveChanges();
+    }
+    
     
 }
