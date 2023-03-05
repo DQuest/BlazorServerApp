@@ -14,79 +14,210 @@
     <MudSelectItem Value="@TableType.User"> @TableType.User.GetDescription() </MudSelectItem>
 </MudSelect>
 
-<MudTable Items="@Animals" Dense="@dense" Hover="@hover" ReadOnly="@ronly" CanCancelEdit="@canCancelEdit" Filter="new Func<Animal,bool>(FilterFunc)"
-          @bind-SelectedItem="selectedItem1" SortLabel="Sort By" CommitEditTooltip="Commit Edit">
-    <ToolBarContent>
-        <MudText Typo="Typo.h6">Periodic Elements</MudText>
-        <MudSpacer />
-        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-    </ToolBarContent>
-    <ColGroup>
-        @if (applyButtonPosition.DisplayApplyButtonAtStart() || (editButtonPosition.DisplayEditButtonAtStart() && editTrigger == TableEditTrigger.EditButton))
-        {
-            <col style="width:50px;" />
-        }
-        <col style="width:50px;" />
-        <col style="width:80px;" />
-        <col style="width:50%;" />
-        <col />
-        <col />
-        @if (applyButtonPosition.DisplayApplyButtonAtEnd() || (editButtonPosition.DisplayEditButtonAtEnd() && editTrigger == TableEditTrigger.EditButton))
-        {
-            <col style="width:50px;" />
-        }
-    </ColGroup>
-    <HeaderContent>
-        <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x=>x.Id)">Идентификатор</MudTableSortLabel></MudTh>
-        <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Animal, object>(x=>x.Name)">Наименование</MudTableSortLabel></MudTh>
-        <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x=>x.Age)">Возраст</MudTableSortLabel></MudTh>
-        <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x=>x.Breed)">Порода</MudTableSortLabel></MudTh>
-    </HeaderContent>
-    <RowTemplate>
-        <MudTd DataLabel="Id">@context.Id</MudTd>
-        <MudTd DataLabel="Name">@context.Name</MudTd>
-        <MudTd DataLabel="Age">@context.Age</MudTd>
-        <MudTd DataLabel="Breed">@context.Breed</MudTd>
-    </RowTemplate>
-    <RowEditingTemplate>
 
-        <MudTd DataLabel="Breed">
-            <MudNumericField @bind-Value="@context.Id" Required Min="1" />
-        </MudTd>
         
-        <MudTd DataLabel="Name">
-            <MudTextField @bind-Value="@context.Name" Required />
-        </MudTd>
-        
-        <MudTd DataLabel="Age">
-            <MudNumericField @bind-Value="@context.Age" Required Min="1" />
-        </MudTd>
-        
-        <MudTd DataLabel="Breed">
-            <MudTextField @bind-Value="@context.Breed" Required />
-        </MudTd>
-        
-        
-    </RowEditingTemplate>
-    <PagerContent>
-        <MudTablePager />
-    </PagerContent>
-    <EditButtonContent Context="button">
-        <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Class="pa-0" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled" />
-    </EditButtonContent>
-</MudTable>
+
+@switch (_tableType)
+{
+    case TableType.Animal:
+    {
+        <MudTable Items="@Animals" Dense="@dense" Hover="@hover" ReadOnly="@ronly" CanCancelEdit="@canCancelEdit" Filter="new Func<Animal, bool>(FilterFuncAnimal)"
+                  @bind-SelectedItem="selectedItemAnimal" SortLabel="Sort By" RowEditPreview="BackupItem" RowEditCommit="ItemHasBeenCommitted" CommitEditTooltip="Commit Edit"> 
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Животные</MudText>
+                <MudSpacer/>
+                <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <ColGroup>
+                @if (applyButtonPosition.DisplayApplyButtonAtStart() || (editButtonPosition.DisplayEditButtonAtStart() && editTrigger == TableEditTrigger.EditButton))
+                {
+                    <col style="width:50px;"/>
+                }
+                <col style="width:50px;"/>
+                <col style="width:80px;"/>
+                <col style="width:50%;"/>
+                <col/>
+                <col/>
+                @if (applyButtonPosition.DisplayApplyButtonAtEnd() || (editButtonPosition.DisplayEditButtonAtEnd() && editTrigger == TableEditTrigger.EditButton))
+                {
+                    <col style="width:50px;"/>
+                }
+            </ColGroup>
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x => x.Id)">Идентификатор</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Animal, object>(x => x.Name)">Наименование</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x => x.Age)">Возраст</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<Animal, object>(x => x.Breed)">Порода</MudTableSortLabel></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Id">@context.Id</MudTd>
+                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Age">@context.Age</MudTd>
+                <MudTd DataLabel="Breed">@context.Breed</MudTd>
+            </RowTemplate>
+            
+            <RowEditingTemplate>
+                <MudTd DataLabel="Id">
+                    <MudNumericField @bind-Value="@context.Id" Required Min="1"/>
+                </MudTd>
+
+                <MudTd DataLabel="Name">
+                    <MudTextField @bind-Value="@context.Name" Required/>
+                </MudTd>
+
+                <MudTd DataLabel="Age">
+                    <MudNumericField @bind-Value="@context.Age" Required Min="1"/>
+                </MudTd>
+
+                <MudTd DataLabel="Breed">
+                    <MudTextField @bind-Value="@context.Breed" Required/>
+                </MudTd>
+            </RowEditingTemplate>
+            
+            <PagerContent>
+                <MudTablePager/>
+            </PagerContent>
+            
+            <EditButtonContent Context="button">
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Class="pa-0" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled"/>
+            </EditButtonContent>
+        </MudTable>
+        break;
+    }
+    case TableType.User:
+    {
+        <MudTable Items="@Users" Dense="@dense" Filter="new Func<User, bool>(FilterFuncUser)"
+                  @bind-SelectedItem="selectedItemUser" SortLabel="Sort By" CommitEditTooltip="Commit Edit"> 
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Пользователи</MudText>
+                <MudSpacer/>
+                <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <ColGroup>
+                @if (applyButtonPosition.DisplayApplyButtonAtStart() || (editButtonPosition.DisplayEditButtonAtStart() && editTrigger == TableEditTrigger.EditButton))
+                {
+                    <col style="width:50px;"/>
+                }
+                <col style="width:50px;"/>
+                <col style="width:80px;"/>
+                <col style="width:50%;"/>
+                <col/>
+                <col/>
+                @if (applyButtonPosition.DisplayApplyButtonAtEnd() || (editButtonPosition.DisplayEditButtonAtEnd() && editTrigger == TableEditTrigger.EditButton))
+                {
+                    <col style="width:50px;"/>
+                }
+            </ColGroup>
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortBy="new Func<User, object>(u => u.Id)">Идентификатор</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<User, object>(u => u.Name)">Имя</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<User, object>(u => u.Age)">Возраст</MudTableSortLabel></MudTh>
+            </HeaderContent>
+            
+            <RowTemplate>
+                <MudTd DataLabel="Id">@context.Id</MudTd>
+                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Age">@context.Age</MudTd>
+            </RowTemplate>
+            
+            <RowEditingTemplate>
+                <MudTd DataLabel="Id">
+                    <MudNumericField @bind-Value="@context.Id" Required Min="1"/>
+                </MudTd>
+                <MudTd DataLabel="Name">
+                    <MudTextField @bind-Value="@context.Name" Required/>
+                </MudTd>
+                <MudTd DataLabel="Age">
+                    <MudNumericField @bind-Value="@context.Age" Required Min="1"/>
+                </MudTd>
+            </RowEditingTemplate>
+            
+            <PagerContent>
+                <MudTablePager/>
+            </PagerContent>
+            
+            <EditButtonContent Context="button">
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Class="pa-0" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled"/>
+            </EditButtonContent>
+        </MudTable>
+        break;
+    }    
+    case TableType.City:
+    {
+        <MudTable Items="@Cities" Dense="@dense" Filter="new Func<City, bool>(FilterFuncCity)"
+                  @bind-SelectedItem="selectedItemCity" SortLabel="Sort By" CommitEditTooltip="Commit Edit"> 
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Города</MudText>
+                <MudSpacer/>
+                <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <ColGroup>
+                @if (applyButtonPosition.DisplayApplyButtonAtStart() || (editButtonPosition.DisplayEditButtonAtStart() && editTrigger == TableEditTrigger.EditButton))
+                {
+                    <col style="width:50px;"/>
+                }
+                <col style="width:50px;"/>
+                <col style="width:80px;"/>
+                <col style="width:50%;"/>
+                <col/>
+                <col/>
+                @if (applyButtonPosition.DisplayApplyButtonAtEnd() || (editButtonPosition.DisplayEditButtonAtEnd() && editTrigger == TableEditTrigger.EditButton))
+                {
+                    <col style="width:50px;"/>
+                }
+            </ColGroup>
+            <HeaderContent>
+                <MudTh><MudTableSortLabel SortBy="new Func<City, object>(c => c.Id)">Идентификатор</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<City, object>(c => c.NameCity)">Наименование города</MudTableSortLabel></MudTh>
+            </HeaderContent>
+            
+            <RowTemplate>
+                <MudTd DataLabel="Id">@context.Id</MudTd>
+                <MudTd DataLabel="NameCity">@context.NameCity</MudTd>
+            </RowTemplate>
+            
+            <RowEditingTemplate>
+                <MudTd DataLabel="Id">
+                    <MudNumericField @bind-Value="@context.Id" Required Min="1"/>
+                </MudTd>
+                <MudTd DataLabel="NameCity">
+                    <MudTextField @bind-Value="@context.NameCity" Required/>
+                </MudTd>
+            </RowEditingTemplate>
+            
+            <PagerContent>
+                <MudTablePager/>
+            </PagerContent>
+            
+            <EditButtonContent Context="button">
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" Class="pa-0" OnClick="@button.ButtonAction" Disabled="@button.ButtonDisabled"/>
+            </EditButtonContent>
+        </MudTable>
+        break;
+    }
+}
 
 
 @code {
     private List<string> editEvents = new();
+
     private bool dense = true;
     private bool hover = true;
     private bool ronly = false;
     private bool canCancelEdit = false;
     private bool blockSwitch = false;
+
     private string searchString = "";
-    private Animal selectedItem1 = null;
+
+    private Animal selectedItemAnimal = null;
     private Animal elementBeforeEdit;
+
+    private City selectedItemCity = null;
+    private City elementBeforeEditCity;
+
+    private User selectedItemUser = null;
+    private User elementBeforeEditUser;
+
     private TableApplyButtonPosition applyButtonPosition = TableApplyButtonPosition.End;
     private TableEditButtonPosition editButtonPosition = TableEditButtonPosition.End;
     private TableEditTrigger editTrigger = TableEditTrigger.RowClick;
@@ -95,15 +226,8 @@
     private List<City> Cities = new List<City>();
     private List<User> Users = new List<User>();
 
-
     private TableType _tableType;
 
-    private List<User> _users;
-
-    private List<Animal> _animals;
-
-    private List<City> _cities;
-    
     private async Task GetTable(TableType tableType)
     {
         _tableType = tableType;
@@ -146,18 +270,21 @@
     private void BackupItem(object element)
     {
         elementBeforeEdit = new()
-            {
-                Id = ((Animal)element).Id,
-                Name = ((Animal)element).Name,
-                Age = ((Animal)element).Age,
-                Breed = ((Animal)element).Breed
-            };
+        {
+            Id = ((Animal)element).Id,
+            Name = ((Animal)element).Name,
+            Age = ((Animal)element).Age,
+            Breed = ((Animal)element).Breed
+        };
         AddEditionEvent($"RowEditPreview event: made a backup of Element {((Animal)element).Name}");
     }
 
     private void ItemHasBeenCommitted(object element)
     {
         AddEditionEvent($"RowEditCommit event: Changes to Element {((Animal)element).Name} committed");
+        AddEditionEvent($"RowEditCommit event: Changes to Element {((Animal)element).Age} committed");
+        AddEditionEvent($"RowEditCommit event: Changes to Element {((Animal)element).Breed} committed");
+
     }
 
     private void ResetItemToOriginalValues(object element)
@@ -169,8 +296,9 @@
         AddEditionEvent($"RowEditCancel event: Editing of Element {((Animal)element).Name} canceled");
     }
 
-    private bool FilterFunc(Animal element)
+    private bool FilterFuncAnimal(Animal element)
     {
+
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
         if (element.Breed.Contains(searchString, StringComparison.OrdinalIgnoreCase))
@@ -181,6 +309,27 @@
             return true;
         return false;
     }
-    
-    
+
+    private bool FilterFuncCity(City element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.NameCity.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{element.Id}".Contains(searchString))
+            return true;
+        return false;
+    }
+
+    private bool FilterFuncUser(User element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{element.Id} {element.Age}".Contains(searchString))
+            return true;
+        return false;
+    }
+
 }
